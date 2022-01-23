@@ -25,23 +25,18 @@ public class JobSchedulerActor extends AbstractActor {
     public Receive createReceive() {
         System.out.println("createReceive from JobSchedulerActor");
         return receiveBuilder()
-                .matchEquals("hello", this::onHello)
                 .match(UrlMessage.class, msg -> {
                     urlDownloaderActor.tell(msg, getContext().getSelf());
                 })
                 .match(ContentMessage.class, msg -> {
                     htmlParserActor.tell(msg, getContext().getSelf());
                 })
-                .match(KeywordMessage.class, msg -> {
-                    contentAnalyzerActor.tell("analyze", getContext().getSelf());
+                .match(ContentMessage.class, msg -> {
+                    contentAnalyzerActor.tell(msg, getContext().getSelf());
                 })
-                /*      .match("indexing", msg -> {
-                          indexingServiceActor.tell("indexing", getContext().getSelf());
-                  })*/
+                .match(KeywordMessage.class, msg -> {
+                    indexingServiceActor.tell(msg, getContext().getSelf());
+                })
                 .build();
-    }
-
-    private void onHello(String msg) {
-        System.out.println("JobSchedulerActor: Recieved hello = " + msg);
     }
 }

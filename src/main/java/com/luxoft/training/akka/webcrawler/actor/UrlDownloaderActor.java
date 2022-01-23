@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import com.luxoft.training.akka.webcrawler.message.ContentMessage;
 import com.luxoft.training.akka.webcrawler.message.UrlMessage;
 import org.jsoup.Jsoup;
+
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -23,14 +24,12 @@ public class UrlDownloaderActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        System.out.println("createReceive from UrlDownloaderActor");
         return receiveBuilder()
                 .match(UrlMessage.class, this::onDownload)
                 .build();
     }
 
     private void onDownload(UrlMessage urlMessage) {
-//        LOGGER.log(Level.INFO, "url = " + url);
         System.out.println("onDownload: url " + urlMessage.getUrl());
         String content = null;
         try {
@@ -44,5 +43,6 @@ public class UrlDownloaderActor extends AbstractActor {
         }
         ContentMessage contentMessage = new ContentMessage(urlMessage.getUrl(), content);
         getSender().tell(contentMessage, getContext().getSelf());
+        System.out.println("onDownload: finished");
     }
 }

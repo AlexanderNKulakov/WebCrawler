@@ -3,6 +3,7 @@ package com.luxoft.training.akka.webcrawler.actor;
 import akka.actor.AbstractActor;
 import com.luxoft.training.akka.webcrawler.message.ContentMessage;
 import com.luxoft.training.akka.webcrawler.message.KeywordMessage;
+import com.luxoft.training.akka.webcrawler.message.UrlMessage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,7 +13,6 @@ public class HtmlParserActor extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        System.out.println("createReceive from HtmlParserActor");
         return receiveBuilder()
                 .match(ContentMessage.class, this::onParse)
                 .build();
@@ -22,12 +22,12 @@ public class HtmlParserActor extends AbstractActor {
 //        LOGGER.log(Level.INFO, "url = " + url);
         System.out.println("onParse: url " + contentMessage.getUrl());
         Document doc = Jsoup.parse(contentMessage.getContent(), contentMessage.getUrl());
-        Elements titles = doc.select("title");
-        for (Element title : titles) {
-            String text = title.text();
-            System.out.println("text: " + text);
-            KeywordMessage keywordMessage = new KeywordMessage(contentMessage.getUrl(), text);
-            getSender().tell(keywordMessage, getContext().getSelf());
+        Elements links = doc.select("a[href]");
+        for (Element link : links) {
+            String url = link.attr("abs:href");
+            System.out.println("onParse: url: " + url);
+            UrlMessage urlMessage = new UrlMessage(url);
+            getSender().tell(urlMessage, getContext().getSelf());
         }
     }
 }
